@@ -58,11 +58,7 @@ void runServer(){
         
         clientFd = accept(fd, (struct sockaddr *) &cliaddr, &cliaddr_len);
         
-        
-        if (clientFd > 0){
             printf("The Client is connected...\n");
-        }
-        
         
         write(clientFd, "HTTP/1.1 200 OK\n", 16);
         write(clientFd, "Content-length: 46\n", 18);
