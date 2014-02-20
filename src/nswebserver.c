@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include "resource.h"
+#include "response.h"
 
 #define PORTNUM 8888
 
@@ -65,15 +66,31 @@ void runServer(){
 	}
         
         printf("The Client is connected...\n");
-        
+	
+	char buffer[501];
+	int requestLength = recv(clientFd, buffer, 500, 0);
+	buffer[requestLength] = '\0';
+	int type;
+
+	printf("REQUEST: %s \n\n\n", buffer);
+
+	char * token = strtok(buffer, " ");
+
+	while(token != NULL){
+        	printf("REQUEST: %s\n", token);
+		token = strtok(NULL, " ");
+	}
+
+
 	/*ceate new response instance*/
-	Resource * resource = createResource("mainpage.html");
-	
-	
-	write(clientFd, "HTTP/1.1 200 OK\n", 16);
-        write(clientFd, "Content-length: 45\n", 18);
-        write(clientFd, "Content-Type: text/html\n\n", 25);
-        write(clientFd, getResourceData(resource),getResourceLength(resource));
+	Response * response = createResponse();
+	Resource * resource = createResource("index.jpeg");
+
+
+	write(clientFd, getResponseStatusString(response), 16);
+        write(clientFd, "Content-length: 5812\n", 21);
+        write(clientFd, "Content-Type: image/jpeg\n\n", 26);
+        write(clientFd, getResponseContentString(response),getResourceLength(resource));
         close(clientFd);
     }
 }
