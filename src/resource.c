@@ -1,9 +1,14 @@
 #include "resource.h"
 #include <stdlib.h>
+#include <string.h>
+
 struct resource{
 	int length;
 	char * data;
+    char * type;
 };
+char * tokenize(char * string);
+
 Resource * createResource(char * location){
 	
 	FILE *fileResource =fopen(location, "r");
@@ -23,8 +28,12 @@ Resource * createResource(char * location){
 
 	/*allocate enough memory to the Resource structure and copy the file t te struct*/
 	resource->data = (char*) malloc (sizeof(char)*resource->length);
+    
 	fread(resource->data,1,resource->length,fileResource);
 	fclose(fileResource);
+    
+    resource->type = NULL;
+
 	return resource;
 }
 char * getResourceData(Resource * r){
@@ -37,3 +46,4 @@ void destroyResource(Resource * r){
 	free(r);
 	r = NULL;
 }
+

@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include "resource.h"
 #include "response.h"
+#include "request.h"
 
 #define PORTNUM 8888
 
@@ -24,8 +25,6 @@ void stopServer();
 void getResource(char * location);
 int main(int argc, char *argv[])
 {
-    
-    
     initialiseServer();
     runServer();
     stopServer();
@@ -56,41 +55,35 @@ void initialiseServer(){
     }
 }
 void runServer(){
+    printf("SERVER RUNNING...\n");
     while (1){
+      
         listen(fd, 10);
         
         clientFd = accept(fd, (struct sockaddr *) &cliaddr, &cliaddr_len);
 
-	if(clientFd == -1){
-		printf("Error accepting Connection\n");	
-	}
+        if(clientFd == -1){
+            printf("Error accepting Connection\n");	
+        }
         
-        printf("The Client is connected...\n");
-	
-	char buffer[501];
-	int requestLength = recv(clientFd, buffer, 500, 0);
-	buffer[requestLength] = '\0';
-	int type;
-
-	printf("REQUEST: %s \n\n\n", buffer);
-
-	char * token = strtok(buffer, " ");
-
-	while(token != NULL){
-        	printf("REQUEST: %s\n", token);
-		token = strtok(NULL, " ");
-	}
-
-
-	/*ceate new response instance*/
-	Response * response = createResponse();
-	Resource * resource = createResource("index.jpeg");
-
-
-	write(clientFd, getResponseStatusString(response), 16);
-        write(clientFd, "Content-length: 5812\n", 21);
-        write(clientFd, "Content-Type: image/jpeg\n\n", 26);
-        write(clientFd, getResponseContentString(response),getResourceLength(resource));
+        printf("::NEW CONNECTION::\n");
+        
+        char buffer[501];
+        int requestLength = recv(clientFd, buffer, 500, 0);
+        buffer[requestLength] = '\0';
+        /*ceate new response instance*/
+        Request * request = createRequest(buffer);
+        
+        Resource * resource = createResource(getRequestResourceLocation(request));
+        Response * response = createResponse(request, resource);
+        printf("\tRequested Resource at: %s\n", getRequestResourceLocation(request));
+        
+    
+        write(clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
+        write(clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
+        write(clientFd, getResponseType(response), strlen(getResponseType(response)));
+        write(clientFd, getResponseContentString(response), getResourceLength(resource));
+        
         close(clientFd);
     }
 }
