@@ -1,38 +1,43 @@
 #include "resource.h"
 #include <stdlib.h>
 #include <string.h>
-
+#include <errno.h>
 struct resource{
 	int length;
 	char * data;
     char * type;
 };
-char * tokenize(char * string);
 
 Resource * createResource(char * location){
 	
-	FILE *fileResource =fopen(location, "r");
+	if(location == NULL){
+        printf("default page");
+    }
+    
+    
+    FILE *fileResource =fopen(location, "r");
+    
+    if (fileResource == NULL)
+    {
+        int errnum = errno;
+        fprintf(stderr, "\tError opening file: %s\n", strerror( errnum ));
+        return NULL;
+    }
 
 	Resource * resource = (Resource *) malloc(sizeof(Resource));
-
-	if (fileResource==NULL){
-		resource = NULL;
-		return resource;
-	}   
-	
-
 	/*get file size*/
 	fseek (fileResource , 0 , SEEK_END);
   	resource->length = ftell (fileResource);
  	rewind (fileResource);
-
-	/*allocate enough memory to the Resource structure and copy the file t te struct*/
+    
+	/*allocate enough memory to the Resource structure and copy the file to the struct*/
 	resource->data = (char*) malloc (sizeof(char)*resource->length);
     
 	fread(resource->data,1,resource->length,fileResource);
 	fclose(fileResource);
     
-    resource->type = NULL;
+    resource->type = strrchr(location, '.');
+    resource->type = resource->type + 1;
 
 	return resource;
 }
@@ -46,4 +51,8 @@ void destroyResource(Resource * r){
 	free(r);
 	r = NULL;
 }
+char * getResourceType(Resource * r){
+    return r->type;
+}
+
 

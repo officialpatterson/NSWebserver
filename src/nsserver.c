@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <pthread.h>
 #include "resource.h"
 #include "response.h"
 #include "request.h"
@@ -18,16 +19,18 @@ int clientFd;
 struct sockaddr_in cliaddr;
 socklen_t cliaddr_len = sizeof(cliaddr);
 socklen_t socksize = sizeof(struct sockaddr_in);
+pthread_t threads[0];
+
 
 void initialiseServer();
+void * connectionHandler(void * clientFd);
 void runServer();
-void stopServer();
-void getResource(char * location);
+
 int main(int argc, char *argv[])
 {
     initialiseServer();
     runServer();
-    stopServer();
+    close(fd);
     return 0;
 }
 
@@ -66,28 +69,50 @@ void runServer(){
             printf("Error accepting Connection\n");	
         }
         
-        printf("::NEW CONNECTION::\n");
+        /*create worker thread for this purpose*/
+        int rc = pthread_create(&threads[0], NULL, connectionHandler, (void *) clientFd);
         
-        char buffer[501];
-        int requestLength = recv(clientFd, buffer, 500, 0);
-        buffer[requestLength] = '\0';
-        /*ceate new response instance*/
-        Request * request = createRequest(buffer);
+        if (rc){
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
         
-        Resource * resource = createResource(getRequestResourceLocation(request));
-        Response * response = createResponse(request, resource);
-        printf("\tRequested Resource at: %s\n", getRequestResourceLocation(request));
-        
-    
-        write(clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
-        write(clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
-        write(clientFd, getResponseType(response), strlen(getResponseType(response)));
-        write(clientFd, getResponseContentString(response), getResourceLength(resource));
-        
-        close(clientFd);
     }
 }
+void * connectionHandler(void * clientFd){
+    
+    printf("::NEW CONNECTION::\n");
+    
+    
+    /*create a new Request*/
+    char buffer[501];
+    int requestLength = recv((int)clientFd, buffer, 500, 0);
+    buffer[requestLength] = '\0';
+    Request * request = createRequest(buffer);
+    
+    
+    Resource * resource = createResource(getRequestResourceLocation(request));
+    printf("\tRequested Resource at: %s\n", getRequestResourceLocation(request));
+    
+    if(resource == NULL){
+        printf("\tSending 404 to client...\n");
+        write((int)clientFd, "HTTP/1.1 404 Not Found\n", 23);
+        write((int)clientFd, "Content-Type: text/html\n", 24);
+        write((int)clientFd, "Connection: close\n\n", 19);
+        
+    }
+    else{
 
-void stopServer(){
-    close(fd);
+        Response * response = createResponse(request, resource);
+        
+        /*send the response to the client*/
+        write((int)clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
+        write((int)clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
+        write((int)clientFd, getResponseType(response), strlen(getResponseType(response)));
+        write((int)clientFd, getResponseContentString(response), getResourceLength(resource));
+    }
+    
+    close((int)clientFd);
+    
+    pthread_exit(NULL);
 }

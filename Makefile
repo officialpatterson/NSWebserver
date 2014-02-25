@@ -1,11 +1,17 @@
-CFLAGS=-W -Wall -DLINUX -g
-OBJECTS=nsserver.o resource.o
+all: nsserver
+nsserver: nsserver.o request.o resource.o response.o
+	gcc nsserver.o resource.o response.o request.o  -o nsserver
 
-NSServer: nsserver.o $(OBJECTS)
-gcc -g -o NSServer nesserver.o $(OBJECTS) -lpthread
+nsserver.o: src/nsserver.c
+	gcc -c src/nsserver.c
 
-nsserver.o: src/nsserver.c 
-resource.o: src/resource.c src/resource.h
+request.o: src/request.c
+	gcc -c src/request.c
 
+resource.o: src/resource.c
+	gcc -c src/resource.c
+
+response.o: src/response.c
+	gcc -c src/response.c
 clean:
-rm -f *.o NSServer *~
+	rm -rf *o nsserver

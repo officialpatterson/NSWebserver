@@ -9,15 +9,14 @@ struct response{
 	char * type;
 	Resource * resource;
 };
+char * concat(char * s1, char * s2);
 
 Response * createResponse(Request * request, Resource * resource){
 	Response * r = (Response *)malloc(sizeof(Response));
 	r->status = "200 OK";
 	
 	r->resource = createResource(getRequestResourceLocation(request));
-    
-    if(r->status == NULL)
-        //resource not found
+
 	r->type = "image/jpeg";
 	return r;
 }
@@ -30,8 +29,22 @@ char * getResponseContentString(Response * r){
 	return getResourceData(r->resource);
 }
 char * getResponseContentLength(Response * r){
-    return "Content-length: 5812\n";
+    /*create string using the resource length, max content size is 1007 digits long*/
+    int resourceLength = getResourceLength(r->resource);
+    char * buff = malloc(sizeof(char) * 1024);
+    
+    snprintf(buff, 1024, "Content-length: %d\n", resourceLength);
+    
+    return buff;
 }
 char * getResponseType(Response * r){
     return "Content-Type: image/jpeg\n\n";
+}
+char* concat(char *s1, char *s2)
+{
+    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }

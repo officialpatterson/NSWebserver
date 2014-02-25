@@ -23,9 +23,9 @@ Request * createRequest(char * requestText){
         if(strncmp(token, "GET", 3) == 0 )
             r->type = token;
         
-        if(strncmp(token, "/", 1) == 0)
+        if(strncmp(token, "/", 1) == 0){
             r->resourceLocation = token+1;
-        
+        }
 		token = strtok(NULL, " ");
 	}
     
