@@ -70,7 +70,7 @@ void runServer(){
         }
         
         /*create worker thread for this purpose*/
-        int rc = pthread_create(&threads[0], NULL, connectionHandler, (void *) clientFd);
+        int rc = pthread_create(&threads[0], NULL, connectionHandler, (void *) (intptr_t)clientFd);
         
         if (rc){
             printf("ERROR; return code from pthread_create() is %d\n", rc);
@@ -86,7 +86,7 @@ void * connectionHandler(void * clientFd){
     
     /*create a new Request*/
     char buffer[501];
-    int requestLength = recv((int)clientFd, buffer, 500, 0);
+    int requestLength = recv((intptr_t)clientFd, buffer, 500, 0);
     buffer[requestLength] = '\0';
     Request * request = createRequest(buffer);
     
@@ -96,9 +96,9 @@ void * connectionHandler(void * clientFd){
     
     if(resource == NULL){
         printf("\tSending 404 to client...\n");
-        write((int)clientFd, "HTTP/1.1 404 Not Found\n", 23);
-        write((int)clientFd, "Content-Type: text/html\n", 24);
-        write((int)clientFd, "Connection: close\n\n", 19);
+        write((intptr_t)clientFd, "HTTP/1.1 404 Not Found\n", 23);
+        write((intptr_t)clientFd, "Content-Type: text/html\n", 24);
+        write((intptr_t)clientFd, "Connection: close\n\n", 19);
         
     }
     else{
@@ -106,13 +106,13 @@ void * connectionHandler(void * clientFd){
         Response * response = createResponse(request, resource);
         
         /*send the response to the client*/
-        write((int)clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
-        write((int)clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
-        write((int)clientFd, getResponseType(response), strlen(getResponseType(response)));
-        write((int)clientFd, getResponseContentString(response), getResourceLength(resource));
+        write((intptr_t)clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
+        write((intptr_t)clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
+        write((intptr_t)clientFd, getResponseType(response), strlen(getResponseType(response)));
+        write((intptr_t)clientFd, getResponseContentString(response), getResourceLength(resource));
     }
     
-    close((int)clientFd);
+    close((intptr_t)clientFd);
     
     pthread_exit(NULL);
 }
