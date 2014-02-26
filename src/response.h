@@ -6,4 +6,4 @@ char * getResponseStatusString(Response *r);
 char * getResponseContentString(Response * r);
 char * getResponseContentLength(Response * r);
 char * getResponseType(Response * r);
-void destroyResponse();
+void destroyResponse(Response * r);

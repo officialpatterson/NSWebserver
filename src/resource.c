@@ -7,23 +7,22 @@ struct resource{
     char * data;
     char * type;
 };
-const char *get_filename_ext(const char *filename);
 
 Resource * createResource(char * location){
 	
 	if(location == NULL){
-        printf("default page");
-    }
+        	printf("default page");
+   	}
     
     
-    FILE *fileResource =fopen(location, "r");
+    	FILE *fileResource =fopen(location, "r");
     
-    if (fileResource == NULL)
-    {
-        int errnum = errno;
-        fprintf(stderr, "\tError opening file: %s\n", strerror( errnum ));
-        return NULL;
-    }
+    	if (fileResource == NULL)
+    	{
+        	int errnum = errno;
+       	 	fprintf(stderr, "\tError opening file: %s\n", strerror( errnum ));
+        	return NULL;
+   	 }
 
 	Resource * resource = (Resource *) malloc(sizeof(Resource));
 	/*get file size*/
@@ -37,8 +36,9 @@ Resource * createResource(char * location){
 	fread(resource->data,1,resource->length,fileResource);
 	fclose(fileResource);
     
-    resource->type = strrchr(location, '.');
-    resource->type = resource->type + 1;
+    	resource->type = strrchr(location, '.');
+	resource->type = resource->type + 1;
+
 	return resource;
 }
 char * getResourceData(Resource * r){
@@ -48,6 +48,10 @@ int getResourceLength(Resource * r){
 	return r->length;
 }
 void destroyResource(Resource * r){
+	if(r == NULL){
+		return;
+	}
+	free(r->data);
 	free(r);
 	r = NULL;
 }

@@ -48,7 +48,6 @@ char * getRequestType(Request  * r){
 char * getRequestHost(Request * r){
     return r->host;
 }
-void destroy(Request * r){
-    r = NULL;
+void destroyRequest(Request * r){
     free(r);
 }

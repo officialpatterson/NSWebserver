@@ -28,7 +28,7 @@ Response * createResponse(Request * request, Resource * resource){
 		printf("type is not jpeg");
 		r->type =  "Content-Type: text/html\n\n";
     	}
-	
+
 	/*create the content length*/
 	int resourceLength = getResourceLength(r->resource);
     	r->length = malloc(sizeof(char) * resourceLength+18);
@@ -49,6 +49,10 @@ char * getResponseContentLength(Response * r){
 char * getResponseType(Response * r){
 
 	return r->type;
+}
+void destroyResponse(Response * r){
+	free(r->length);	
+	free(r);
 }
 
 

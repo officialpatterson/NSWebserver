@@ -76,7 +76,7 @@ void runServer(){
             printf("ERROR; return code from pthread_create() is %d\n", rc);
             exit(-1);
         }
-        
+   
     }
 }
 void * connectionHandler(void * clientFd){
@@ -89,7 +89,7 @@ void * connectionHandler(void * clientFd){
     int requestLength = recv((intptr_t)clientFd, buffer, 500, 0);
     buffer[requestLength] = '\0';
     Request * request = createRequest(buffer);
-    
+    Response * response;
     
     Resource * resource = createResource(getRequestResourceLocation(request));
     printf("\tRequested Resource at: %s\n", getRequestResourceLocation(request));
@@ -102,16 +102,18 @@ void * connectionHandler(void * clientFd){
         
     }
     else{
-
-        Response * response = createResponse(request, resource);
+        response = createResponse(request, resource);
         
         /*send the response to the client*/
         write((intptr_t)clientFd, getResponseStatusString(response), strlen(getResponseStatusString(response)));
         write((intptr_t)clientFd, getResponseContentLength(response), strlen(getResponseContentLength(response)));
         write((intptr_t)clientFd, getResponseType(response), strlen(getResponseType(response)));
         write((intptr_t)clientFd, getResponseContentString(response), getResourceLength(resource));
+
+	destroyResponse(response);
     }
-    
+    destroyResource(resource);
+    destroyRequest(request);
     close((intptr_t)clientFd);
     
     pthread_exit(NULL);
