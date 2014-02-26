@@ -7,44 +7,48 @@
 struct response{
 	char * status;
 	char * type;
+	char * length;
 	Resource * resource;
 };
-char * concat(char * s1, char * s2);
-
 Response * createResponse(Request * request, Resource * resource){
 	Response * r = (Response *)malloc(sizeof(Response));
-	r->status = "200 OK";
+	r->status = "HTTP/1.1 200 OK\n";
 	
-	r->resource = createResource(getRequestResourceLocation(request));
+	r->resource = resource;
 
-	r->type = "image/jpeg";
+	/*create the response type*/
+	char * resourceType = getResourceType(r->resource);
+ 
+    	if(resourceType != NULL && (strcmp(resourceType, "jpeg") == 0 || strcmp(resourceType, "jpg") == 0)){
+        	printf("type is jpeg");
+
+		r->type =  "Content-Type: image/jpeg\n\n";
+    	}
+    	else{
+		printf("type is not jpeg");
+		r->type =  "Content-Type: text/html\n\n";
+    	}
+	
+	/*create the content length*/
+	int resourceLength = getResourceLength(r->resource);
+    	r->length = malloc(sizeof(char) * resourceLength+18);
+    	snprintf(r->length, resourceLength+18, "Content-length: %d\n", resourceLength);
+
 	return r;
 }
 char * getResponseStatusString(Response *r){
-	char * status = "HTTP/1.1 200 OK\n";
-
-	return status;
+	return r->status;
 }
 char * getResponseContentString(Response * r){
 	return getResourceData(r->resource);
 }
 char * getResponseContentLength(Response * r){
     /*create string using the resource length, max content size is 1007 digits long*/
-    int resourceLength = getResourceLength(r->resource);
-    char * buff = malloc(sizeof(char) * 1024);
-    
-    snprintf(buff, 1024, "Content-length: %d\n", resourceLength);
-    
-    return buff;
+	return r->length;
 }
 char * getResponseType(Response * r){
-    return "Content-Type: image/jpeg\n\n";
+
+	return r->type;
 }
-char* concat(char *s1, char *s2)
-{
-    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
-    //in real code you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
+
+

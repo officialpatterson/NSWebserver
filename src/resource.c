@@ -3,10 +3,11 @@
 #include <string.h>
 #include <errno.h>
 struct resource{
-	int length;
-	char * data;
+    int length;
+    char * data;
     char * type;
 };
+const char *get_filename_ext(const char *filename);
 
 Resource * createResource(char * location){
 	
@@ -38,7 +39,6 @@ Resource * createResource(char * location){
     
     resource->type = strrchr(location, '.');
     resource->type = resource->type + 1;
-
 	return resource;
 }
 char * getResourceData(Resource * r){

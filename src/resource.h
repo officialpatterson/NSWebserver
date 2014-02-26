@@ -7,3 +7,4 @@ Resource * createResource(char * location);
 char * getResourceData(Resource * r);
 int getResourceLength(Resource * r);
 void destroyResource(Resource * r);
+char * getResourceType(Resource * r);
