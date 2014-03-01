@@ -20,14 +20,17 @@ Response * createResponse(Request * request, Resource * resource){
 	char * resourceType = getResourceType(r->resource);
  
     	if(resourceType != NULL && (strcmp(resourceType, "jpeg") == 0 || strcmp(resourceType, "jpg") == 0)){
-        	printf("type is jpeg");
-
-		r->type =  "Content-Type: image/jpeg\n\n";
+            r->type =  "Content-Type: image/jpeg\n\n";
     	}
-    	else{
-		printf("type is not jpeg");
+    	else if(resourceType != NULL && (strcmp(resourceType, "html") == 0 || strcmp(resourceType, "htm") == 0)){
 		r->type =  "Content-Type: text/html\n\n";
     	}
+        else if(resourceType != NULL && (strcmp(resourceType, "gif") == 0)){
+            r->type =  "Content-Type: image/gif\n\n";
+    	}
+        else{
+            r->type =  "Content-Type: application/octet-stream\n\n";
+        }
 
 	/*create the content length*/
 	int resourceLength = getResourceLength(r->resource);
