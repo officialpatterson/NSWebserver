@@ -36,8 +36,7 @@ Request * createRequest(char * requestText){
     return r;
 }
 char * getRequestResourceLocation(Request * r){
-    
-    if(strncmp(r->resourceLocation, "/", 2) == 0 )
+    if(strncmp(r->resourceLocation, "public/", 8) == 0 )
         return "index.html";
     else
         return r->resourceLocation;

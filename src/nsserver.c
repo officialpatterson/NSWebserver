@@ -81,12 +81,13 @@ void runServer(){
 }
 void * connectionHandler(void * clientFd){
     
-    printf("::NEW CONNECTION::\n");
+    printf("::NEW CONNECTION on client connection: %i::\n", (intptr_t)clientFd);
     
-    
+	int requestLength;
     /*create a new Request*/
     char buffer[501];
-    int requestLength = recv((intptr_t)clientFd, buffer, 500, 0);
+   requestLength = read((intptr_t)clientFd, buffer, 500);
+    	
     buffer[requestLength] = '\0';
     Request * request = createRequest(buffer);
     Response * response;
@@ -114,6 +115,7 @@ void * connectionHandler(void * clientFd){
     }
     destroyResource(resource);
     destroyRequest(request);
+
     close((intptr_t)clientFd);
     
     pthread_exit(NULL);
