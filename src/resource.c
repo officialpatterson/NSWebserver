@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h> // for open
+#include <sys/stat.h>
 struct resource{
     int length;
     char * data;
@@ -9,34 +11,35 @@ struct resource{
 };
 
 Resource * createResource(char * location){
-	
-	if(location == NULL){
-        	printf("default page");
-   	}
+	Resource * resource;
+    FILE *fileResource;
     
+	if(location == NULL)
+        return NULL;
     
-    	FILE *fileResource =fopen(location, "r");
-    
-    	if (fileResource == NULL)
-    	{
-        	int errnum = errno;
-       	 	fprintf(stderr, "\tError opening file: %s\n", strerror( errnum ));
-        	return NULL;
-   	 }
+    if((fileResource =fopen(location, "r")) == NULL)
+        return NULL;
 
-	Resource * resource = (Resource *) malloc(sizeof(Resource));
-	/*get file size*/
-	fseek (fileResource , 0 , SEEK_END);
-  	resource->length = ftell (fileResource);
- 	rewind (fileResource);
+    struct stat fs;
+    int fd = open(location, O_RDONLY);
+    if (fstat(fd, &fs) == -1)
+        return NULL;
+    int size = fs.st_size;
+    
+	
+    if((resource = (Resource *) malloc(sizeof(Resource))) == NULL)
+        return NULL;
+    
+  	resource->length = size;
     
 	/*allocate enough memory to the Resource structure and copy the file to the struct*/
-	resource->data = (char*) malloc (sizeof(char)*resource->length);
+	if((resource->data = (char*) malloc (sizeof(char)*resource->length)) == NULL)
+        return NULL;
     
 	fread(resource->data,1,resource->length,fileResource);
 	fclose(fileResource);
     
-    	resource->type = strrchr(location, '.');
+    resource->type = strrchr(location, '.');
 	resource->type = resource->type + 1;
 
 	return resource;

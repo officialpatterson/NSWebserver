@@ -13,7 +13,7 @@ Request * createRequest(char * requestText){
     Request * r = (Request *)malloc(sizeof(Request));
     
     if(r == NULL){
-        //request allocation failed
+        return NULL;
     }
     
     char * token = strtok(requestText, " ");
@@ -31,7 +31,7 @@ Request * createRequest(char * requestText){
     
     
     if(r->type == NULL || r->resourceLocation == NULL){
-        printf("invalid Request");
+        return NULL;
     }
     return r;
 }
